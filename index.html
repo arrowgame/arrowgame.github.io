@@ -1,0 +1,65 @@
+<html>
+	<head>
+		<title>Project 1</title>
+		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	</head>
+	<body>
+		<div id = "startScreen">
+			<div class="jumbotron">
+				<h1 class="display-4">Welcome to Arrows: The Game</h1>
+				<p class="lead">This is a simple, yet challenging, game designed to test your reflexes.</p>
+				<hr class="my-4">
+				<ul class = "lead">
+					<li>Arrows will flash on the screen randomly</li>
+					<li>If it's a <span style = "color:blue;font-weight:bold">blue</span> arrow, use the arrow keys to indicate the direction of the arrow</li>
+					<div id = "bluearrows" style="margin-top:20px;">
+						<img src = "images/bluedownarrow.png" style = "width:5%;margin-right:50px;">
+						<img src = "images/blueuparrow.png" style = "width:5%;margin-right:50px;">
+						<img src = "images/bluerightarrow.png" style = "width:8%;margin-right:50px;">
+						<img src = "images/blueleftarrow.png" style = "width:8%;">
+					</div>
+					<li>If it's a <span style = "color:red;font-weight:bold">red</span> arrow, use the arrow keys to indicate the opposite of the direction the arrow</li>
+					<div id = "redarrows" style="margin-top:20px;">
+						<img src = "images/reddownarrow.png" style = "width:5%;margin-right:50px;">
+						<img src = "images/reduparrow.png" style = "width:5%;margin-right:50px;">
+						<img src = "images/redrightarrow.png" style = "width:8%;margin-right:50px;">
+						<img src = "images/redleftarrow.png" style = "width:8%;">
+					</div>
+					<li>Try to achieve the highest score possible in the given amount of time!</li>
+				</ul>
+				<a class="btn btn-dark btn-lg" id = "start" href="#" role="button">Single Player</a>
+				<a class="btn btn-dark btn-lg" id = "multiplayer" href="#" role="button">Multiplayer</a>
+			  </div>
+		</div>
+		<div id = "multiplayerLobby" class = "hidden">
+			<h1>Multiplayer Lobby</h1>
+			<button id = "backtostart">Go Back</button>
+		</div>
+		<div id = "game" class = "hidden">
+			<h1 class = "display-4" style="text-align:center;">Arrows</h1>
+			<br/>
+			<div style="display:block;margin:auto;width:60%;height:60%;border:1px solid #000;" id = "gameboard">
+			</div>
+			<div id="scoreboard" style="margin-top:-25%;margin-left:5%;font-size:2rem;">
+				<!--<p class = "lead">Score:</p>-->
+			</div>
+			<div id="clock" style="margin-top:10%;margin-left:5%;font-size:2rem;">
+			</div>
+		</div>
+		<div id = "end" class = "hidden">
+			<div class="card text-center">
+				<div class="card-header">
+				  Arrows
+				</div>
+				<div class="card-body">
+				  <h3 class="card-title">Game Over</h3>
+				  <div id = "gameover" class = "lead">
+				  </div>
+				  <a href="#" class="btn btn-dark" id = "playagain">Play Again</a>
+				</div>
+			  </div>
+		</div>
+	</body>
+	<script src="script.js"></script>
+</html>

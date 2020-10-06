@@ -1,0 +1,12 @@
+.hidden {
+    display: none;
+}
+
+#gameboard {
+    display: block;
+    text-align: center;
+}
+
+#gameboard img {
+    margin-top: 10%;
+}
