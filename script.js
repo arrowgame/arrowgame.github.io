@@ -1,5 +1,5 @@
 const timeLimit = 10;
-var timeInterval = 1000;
+var timeInterval = 750;
 var score = 0;
 var gameState = "active";
 var scoreInc = false;
