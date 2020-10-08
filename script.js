@@ -1,3 +1,20 @@
+var firebaseConfig = {
+    apiKey: "AIzaSyCxs_wnFFO1qFvcJUFkK3VzHbZdlPKGP_o",
+    authDomain: "arrowgame-f0b5f.firebaseapp.com",
+    databaseURL: "https://arrowgame-f0b5f.firebaseio.com",
+    projectId: "arrowgame-f0b5f",
+    storageBucket: "arrowgame-f0b5f.appspot.com",
+    messagingSenderId: "338708782169",
+    appId: "1:338708782169:web:1bf0833518b82fba83a548"
+};
+  // Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+let myDatabase = firebase.database();
+myDatabase.ref("test").once('value', ss=>{
+	alert(ss.val());
+})
+
 const timeLimit = 10;
 var timeInterval = 1000;
 var score = 0;
@@ -6,6 +23,13 @@ var scoreInc = false;
 var seconds = timeLimit;
 let arrows = ["bluedownarrow", "blueleftarrow", "bluerightarrow", "blueuparrow",
 "reddownarrow", "redleftarrow", "redrightarrow", "reduparrow"];
+let userid = localStorage.getItem("userid");
+console.log(userid);
+if(!userid){
+	uuid = `userid-${Math.floor(1000000000*Math.random())}`;
+	localStorage.setItem("userid", uuid);
+}
+console.log(userid);
 let currentImage = arrows[0];
 var interval;
 
