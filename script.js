@@ -11,8 +11,12 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 let myDatabase = firebase.database();
-myDatabase.ref("test").once('value', ss=>{
-	alert(ss.val());
+myDatabase.ref("arrows").once('value', ss=>{
+	let numArrows = ss.val().length;
+	let randArrow = Math.floor(numArrows*Math.random());
+	myDatabase.ref("arrows").child(randArrow).once('value', ss2=>{
+		alert(ss2.val());
+	})
 })
 
 const timeLimit = 10;
@@ -23,13 +27,6 @@ var scoreInc = false;
 var seconds = timeLimit;
 let arrows = ["bluedownarrow", "blueleftarrow", "bluerightarrow", "blueuparrow",
 "reddownarrow", "redleftarrow", "redrightarrow", "reduparrow"];
-let userid = localStorage.getItem("userid");
-console.log(userid);
-if(!userid){
-	uuid = `userid-${Math.floor(1000000000*Math.random())}`;
-	localStorage.setItem("userid", uuid);
-}
-console.log(userid);
 let currentImage = arrows[0];
 var interval;
 
