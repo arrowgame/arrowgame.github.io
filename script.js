@@ -1,5 +1,5 @@
 const timeLimit = 10;
-var timeInterval = 750;
+var timeInterval = 1000;
 var score = 0;
 var gameState = "active";
 var scoreInc = false;
@@ -86,6 +86,7 @@ function createNewImage(){
 }
 
 document.getElementById("start").onclick = function() {
+	timeInterval = 1000;
 	seconds = timeLimit;
 	scoreInc = false;
 	score = 0;
