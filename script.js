@@ -1,4 +1,5 @@
 const timeLimit = 10;
+var timeInterval = 1000;
 var score = 0;
 var gameState = "active";
 var scoreInc = false;
@@ -91,7 +92,7 @@ document.getElementById("start").onclick = function() {
 	document.getElementById("startScreen").classList.add("hidden");
 	document.getElementById("game").classList.remove("hidden");
 	updateScore();
-	interval = setInterval(updateGame,1000);
+	interval = setInterval(updateGame,timeInterval);
 }
 
 document.getElementById("multiplayer").onclick = function() {
