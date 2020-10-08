@@ -11,13 +11,6 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 let myDatabase = firebase.database();
-/* myDatabase.ref("arrows").once('value', ss=>{
-	let numArrows = ss.val().length;
-	let randArrow = Math.floor(numArrows*Math.random());
-	myDatabase.ref("arrows").child(randArrow).once('value', ss2=>{
-		alert(ss2.val());
-	})
-}) */
 
 const timeLimit = 10;
 var timeInterval = 1000;
@@ -29,6 +22,73 @@ let arrows = ["bluedownarrow", "blueleftarrow", "bluerightarrow", "blueuparrow",
 "reddownarrow", "redleftarrow", "redrightarrow", "reduparrow"];
 let currentImage = arrows[0];
 var interval;
+
+let fakeuserid = "nchintala";
+let fakeuserobj = {"username": "NishChin", "ready":false};
+
+/*let gameDemo = {
+	"gameid":"randomgameidhere",
+  	"created":"2020-10-02T12:49:00.000Z",
+	"maxplayers":2,  
+	"status":"Waiting 1/2",
+	"players": {
+		"player1idhere": {
+			"username": "ProfNinja",
+			"ready": false
+		}
+	}
+}*/
+
+class LobbyGame {
+	constructor(gameJSON, ref){
+		this.database = ref;
+		this.$html = $(`<div></div>`);
+		this.database.on("value", ss=>{
+			this.updateFromJSON(ss.val());
+		});
+  }
+  
+  updateFromJSON(gameJSON){
+    this.created = gameJSON.created || new Date().toLocaleString();
+    this.title = gameJSON.title || `New Game ${this.created}`;
+    this.gameid = gameJSON.gameid || `Game-${Math.floor(Math.random()*1000000000)}`;
+    this.maxplayers = gameJSON.maxplayers || 2;
+    this.players = gameJSON.players || {};
+    this.status = gameJSON.status || `Waiting ${Object.keys(this.players).length}/${this.maxplayers}`;
+    this.render();
+  }
+  
+  toJSON(){
+    let gameObj = {};
+    gameObj.created = this.created;
+    gameObj.gameid = this.gameid;
+    gameObj.title = this.title;
+    gameObj.maxplayers = this.maxplayers;
+    gameObj.players = this.players;
+    gameObj.status = this.status;
+    return gameObj;
+  }
+  
+  render(){
+		this.$html.html(`
+<div class="lobbygame">
+<h3 class="title">${this.title}</h3>
+<h4 class="status">${this.status}</h4>
+<button class="join">Join</button>
+<button class="edit">Edit</button>
+</div>
+      `);
+//    this.$html.find(".join").off("click");//TODO: zombie check
+    this.$html.find(".join").on("click", ()=>{
+      this.database.child("players").child(fakeuserid).set(fakeuserobj);
+    });
+    this.$html.find(".edit").on("click", ()=>{
+			let newTitle = prompt("Enter the new title for the lobby:");
+			this.database.child("title").set(newTitle || this.title);
+    });
+  }
+}
+
 
 function updateGame(){
 	document.getElementById("gameboard").innerHTML = "";
@@ -124,6 +184,16 @@ document.getElementById("start").onclick = function() {
 }
 
 document.getElementById("multiplayer").onclick = function() {
+	//let aGame = new LobbyGame({});
+	let mylobbiesDB = myDatabase.ref("lobbies");
+
+	mylobbiesDB.on("child_added", (aGameSnap)=>{
+		let gameJSON = aGameSnap.val();
+		let newGameInstance = new LobbyGame(gameJSON, mylobbiesDB.child(aGameSnap.key));
+		$("#multiplayerLobby").append(newGameInstance.$html);
+	});
+	//TODO need a child_removed to get rid of deleted games
+	//console.log(JSON.stringify(aGame.toJSON()));
 	document.getElementById("startScreen").classList.add("hidden");
 	document.getElementById("multiplayerLobby").classList.remove("hidden");
 }
