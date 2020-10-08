@@ -80,7 +80,8 @@ class LobbyGame {
       `);
 //    this.$html.find(".join").off("click");//TODO: zombie check
     this.$html.find(".join").on("click", ()=>{
-      this.database.child("players").child(fakeuserid).set(fakeuserobj);
+			this.database.child("players").child(fakeuserid).set(fakeuserobj);
+			//TODO: make sure a max of 4 players can join the game
     });
     this.$html.find(".edit").on("click", ()=>{
 			let newTitle = prompt("Enter the new title for the lobby:");
