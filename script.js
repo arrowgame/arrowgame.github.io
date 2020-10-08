@@ -11,13 +11,13 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 let myDatabase = firebase.database();
-myDatabase.ref("arrows").once('value', ss=>{
+/* myDatabase.ref("arrows").once('value', ss=>{
 	let numArrows = ss.val().length;
 	let randArrow = Math.floor(numArrows*Math.random());
 	myDatabase.ref("arrows").child(randArrow).once('value', ss2=>{
 		alert(ss2.val());
 	})
-})
+}) */
 
 const timeLimit = 10;
 var timeInterval = 1000;
@@ -99,7 +99,13 @@ function updateScore(){
 
 function createNewImage(){
 	var img = document.createElement("img");
-	currentImage = arrows[Math.floor(Math.random()*8)];
+	myDatabase.ref("arrows").once('value', ss=>{
+		let numArrows = ss.val().length;
+		let randArrow = Math.floor(numArrows*Math.random());
+		myDatabase.ref("arrows").child(randArrow).once('value', ss2=>{
+			currentImage = ss2.val();
+		})
+	})
 	img.src = "/images/"+ currentImage + ".png";
 	var src = document.getElementById("gameboard");
 	src.appendChild(img);
