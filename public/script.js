@@ -11,7 +11,12 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 let myDatabase = firebase.database();
-
+let userid = localStorage.getItem("userid");
+if (!userid){
+  uuid = `userid-${Math.floor(1000000000*Math.random())}`;
+  localStorage.setItem("userid", uuid);
+}
+let userobj = {"username":"Anonymous","ready":false};
 const timeLimit = 10;
 var timeInterval = 1000;
 var score = 0;
@@ -45,7 +50,7 @@ class LobbyGame {
 		this.$html = $(`<div></div>`);
 		this.database.on("value", ss=>{
 			console.log(ss.val());
-			console.log(gameJSON);
+			//console.log(gameJSON);
 			this.updateFromJSON(ss.val());
 		});
   }
@@ -184,16 +189,37 @@ document.getElementById("start").onclick = function() {
 	interval = setInterval(updateGame,1000);
 }
 
+let makeGame = function(gameJSON){
+	let res = {};
+	res.created = gameJSON.created || new Date().toLocaleString();
+  res.title = gameJSON.title || `New Game ${res.created}`;
+  res.gameid = gameJSON.gameid || `Game-${Math.floor(Math.random()*1000000000)}`;
+  res.maxplayers = gameJSON.maxplayers || 4;
+  res.players = gameJSON.players || false;
+  res.status = gameJSON.status || `Starting Up`;
+  return res;
+}
+
 document.getElementById("addLobby").onclick = function() {
 	let mylobbiesDB = myDatabase.ref("lobbies");
 	let newGameRef = mylobbiesDB.push();
+	let gameObj = makeGame({});
+	gameObj.creator = userid;
+	gameObj.gameid = newGameRef.key;
+	gameObj.players = {};
+	gameObj.players[userid] = userobj;
+	newGameRef.set(gameObj);
 	mylobbiesDB.on("child_added", (aGameSnap)=>{
+		newGameRef = new LobbyGame(gameObj, mylobbiesDB.child(aGameSnap.key));
+		$("#multiplayerLobby").append(newGameRef.$html);
+	});
+	/*mylobbiesDB.on("child_added", (aGameSnap)=>{
 		let gameJSON = aGameSnap.val();
-		//console.log(mylobbiesDB.child(aGameSnap.key));
+		console.log(mylobbiesDB.child(aGameSnap.key));
 		//console.log(gameJSON);
 		newGameRef = new LobbyGame(gameJSON, mylobbiesDB.child(aGameSnap.key));
 		$("#multiplayerLobby").append(newGameRef.$html);
-	});
+	});*/
 	//TODO need a child_removed to get rid of deleted games
 }
 
