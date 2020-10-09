@@ -90,7 +90,6 @@ class LobbyGame {
   }
 }
 
-
 function updateGame(){
 	document.getElementById("gameboard").innerHTML = "";
 	setTimeout(createNewImage, 500);
@@ -174,14 +173,13 @@ function createNewImage(){
 }
 
 document.getElementById("start").onclick = function() {
-	timeInterval = 1000;
 	seconds = timeLimit;
 	scoreInc = false;
 	score = 0;
 	document.getElementById("startScreen").classList.add("hidden");
 	document.getElementById("game").classList.remove("hidden");
 	updateScore();
-	interval = setInterval(updateGame,timeInterval);
+	interval = setInterval(updateGame,1000);
 }
 
 document.getElementById("multiplayer").onclick = function() {
