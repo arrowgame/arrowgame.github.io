@@ -44,6 +44,8 @@ class LobbyGame {
 		this.database = ref;
 		this.$html = $(`<div></div>`);
 		this.database.on("value", ss=>{
+			console.log(ss.val());
+			console.log(gameJSON);
 			this.updateFromJSON(ss.val());
 		});
   }
@@ -182,17 +184,20 @@ document.getElementById("start").onclick = function() {
 	interval = setInterval(updateGame,1000);
 }
 
-document.getElementById("multiplayer").onclick = function() {
-	//let aGame = new LobbyGame({});
+document.getElementById("addLobby").onclick = function() {
 	let mylobbiesDB = myDatabase.ref("lobbies");
-
+	let newGameRef = mylobbiesDB.push();
 	mylobbiesDB.on("child_added", (aGameSnap)=>{
 		let gameJSON = aGameSnap.val();
-		let newGameInstance = new LobbyGame(gameJSON, mylobbiesDB.child(aGameSnap.key));
-		$("#multiplayerLobby").append(newGameInstance.$html);
+		//console.log(mylobbiesDB.child(aGameSnap.key));
+		//console.log(gameJSON);
+		newGameRef = new LobbyGame(gameJSON, mylobbiesDB.child(aGameSnap.key));
+		$("#multiplayerLobby").append(newGameRef.$html);
 	});
 	//TODO need a child_removed to get rid of deleted games
-	//console.log(JSON.stringify(aGame.toJSON()));
+}
+
+document.getElementById("multiplayer").onclick = function() {
 	document.getElementById("startScreen").classList.add("hidden");
 	document.getElementById("multiplayerLobby").classList.remove("hidden");
 }
