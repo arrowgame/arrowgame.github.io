@@ -121,26 +121,36 @@ let renderLobbyStartScreen = function(lobbyDB, gameDB, param){
 	//renderTeamChooser
 }
 let renderActiveGame = function(gameDB, $body){
-	$body.html(`
-	<button id = "startTheGame">Start Game</button>
-	`)
-	$("#startTheGame").on("click", ()=>{
-		seconds = timeLimit;
-		scoreInc = false;
-		score = 0;
-		$body.classList.add("hidden");
-		//document.getElementById("startScreen").classList.add("hidden");
-		document.getElementById("game").classList.remove("hidden");
-		updateScore();
-		interval = setInterval(updateGame,1000);
-	});
+	seconds = timeLimit;
+	scoreInc = false;
+	score = 0;
+	//$body.classList.add("hidden");
+	//document.getElementById("startScreen").classList.add("hidden");
+	//document.getElementById("game").classList.remove("hidden");
+	updateScore();
+	interval = setInterval(updateGame,1000);
 }
-let renderWaitingScreen = function(gameDB, $body, status, lobbyDB){
-	$body.html(`<h1>Game Status: ${status}</h1>`);
+let renderWaitingScreen = function(gameDB, $body, status, lobbyDB, gameid){
+	$body.html(`
+	<h1>Game Status: ${status}</h1>
+	<div id = "enoughPlayers">
+		<button id = "startPlayingGame" disabled>Start</button>
+	</div>
+	`);
 	lobbyDB.child("status").on("value", ss=>{
 		$body.find("h1").html(`Game Status: ${ss.val()}`);
 	});
-	
+	var playerCount = 0;
+	lobbyDB.child('players').on("value", function(snapshot) {
+		playerCount = snapshot.numChildren();
+	})
+	if(playerCount > 1){
+		console.log("reached");
+		$("#startPlayingGame").removeAttr('disabled');
+	}
+	$("#startPlayingGame").on("click", ()=>{
+		startGame();
+	})
 };
 
 let gotoScreen = function(params){
@@ -152,14 +162,18 @@ let gotoScreen = function(params){
 	<div id = "gamescreen">
 	</div>
 	`);
-	$("#backtolobby").click(renderLobby);
+	//$("#backtolobby").click(renderLobby);
+	$('#backtolobby').on("click", ()=>{
+		//document.getElementById("multiplayerLobby").classList.remove("hidden");
+		renderLobby();
+	})
 	let gameDB = firebase.database().ref("lobbies").child(gameid);
 	lobbyDB.child('players').child(userid).child('ready').on('value', (ss)=>{
 		let readyState = ss.val();
 		//console.log(readyState);
 		if(!readyState){
 			lobbyDB.child('status').off();
-			renderWaitingScreen(gameDB, $("#gamescreen"), status, lobbyDB);
+			renderWaitingScreen(gameDB, $("#gamescreen"), status, lobbyDB, gameid);
 		} else {
 			lobbyDB.child('status').on('value', ss=>{
 				let status = ss.val();
@@ -253,8 +267,7 @@ function createNewImage(){
 	src.appendChild(img);
 	scoreInc = true;
 }
-
-document.getElementById("start").onclick = function() {
+let startGame = function(){
 	seconds = timeLimit;
 	scoreInc = false;
 	score = 0;
@@ -263,8 +276,19 @@ document.getElementById("start").onclick = function() {
 	updateScore();
 	interval = setInterval(updateGame,1000);
 }
+document.getElementById("start").onclick = startGame;
+/*document.getElementById("start").onclick = function() {
+	seconds = timeLimit;
+	scoreInc = false;
+	score = 0;
+	document.getElementById("startScreen").classList.add("hidden");
+	document.getElementById("game").classList.remove("hidden");
+	updateScore();
+	interval = setInterval(updateGame,1000);
+}*/
 
 let renderLobby = function(){
+	document.getElementById("multiplayerLobby").classList.remove("hidden");
 	$("#multiplayerLobby").html(`<button id = "newgame">Click to make lobby</button>`);
 	mylobbiesDB.on("child_added", (aGameSnap)=>{
 		let gameJSON = aGameSnap.val();
@@ -295,34 +319,6 @@ let renderLobby = function(){
 		newGameRef.set(gameObj);
 	});
 };
-
-/*document.getElementById("addLobby").onclick = function() {
-	let newGameRef = mylobbiesDB.push();
-	let gameObj = makeGame({});
-	gameObj.creator = userid;
-	gameObj.gameid = newGameRef.key;
-	gameObj.players = {};
-	gameObj.players[userid] = userobj;
-	newGameRef.set(gameObj);
-	mylobbiesDB.once("child_added", (aGameSnap)=>{
-		//console.log(mylobbiesDB.child(aGameSnap.key));
-		newGameRef = new LobbyGame(gameObj, mylobbiesDB.child(aGameSnap.key));
-		lobbies.push(newGameRef);
-	})*/
-	/*mylobbiesDB.once('value', function(snapshot) {
-		snapshot.forEach(function(childSnapshot) {
-			$("#multiplayerLobby").append(childSnapshot.$html);
-		})
-	})*/
-	/*mylobbiesDB.once("child_added", (aGameSnap)=>{
-		//console.log(mylobbiesDB.child(aGameSnap.key));
-		newGameRef = new LobbyGame(gameObj, mylobbiesDB.child(aGameSnap.key));
-		console.log(newGameRef);
-		$("#multiplayerLobby").append(newGameRef.$html);
-	});
-	displayLobbies();*/
-	//TODO need a child_removed to get rid of deleted games
-//}
 
 document.getElementById("multiplayer").onclick = function() {
 	document.getElementById("startScreen").classList.add("hidden");
