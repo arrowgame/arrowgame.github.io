@@ -11,6 +11,7 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 let myDatabase = firebase.database();
+let mylobbiesDB = myDatabase.ref("lobbies");
 let userid = localStorage.getItem("userid");
 if (!userid){
   uuid = `userid-${Math.floor(1000000000*Math.random())}`;
@@ -27,9 +28,11 @@ let arrows = ["bluedownarrow", "blueleftarrow", "bluerightarrow", "blueuparrow",
 "reddownarrow", "redleftarrow", "redrightarrow", "reduparrow"];
 let currentImage = arrows[0];
 var interval;
+var lobbies = [];
+var visibleLobbies = [];
 
-let fakeuserid = "nchintala";
-let fakeuserobj = {"username": "NishChin", "ready":false};
+//let fakeuserid = "nchintala";
+//let fakeuserobj = {"username": "NishChin", "ready":false};
 
 /*let gameDemo = {
 	"gameid":"randomgameidhere",
@@ -49,8 +52,10 @@ class LobbyGame {
 		this.database = ref;
 		this.$html = $(`<div></div>`);
 		this.database.on("value", ss=>{
-			console.log(ss.val());
-			//console.log(gameJSON);
+			if(!ss.val()){
+				this.$html.html('');
+				this.database.off("value");
+			}
 			this.updateFromJSON(ss.val());
 		});
   }
@@ -59,8 +64,9 @@ class LobbyGame {
     this.created = gameJSON.created || new Date().toLocaleString();
     this.title = gameJSON.title || `New Game ${this.created}`;
     this.gameid = gameJSON.gameid || `Game-${Math.floor(Math.random()*1000000000)}`;
-    this.maxplayers = gameJSON.maxplayers || 2;
-    this.players = gameJSON.players || {};
+    this.maxplayers = gameJSON.maxplayers || 4;
+		this.players = gameJSON.players || {};
+		this.creator = gameJSON.creator || "anon";
     this.status = gameJSON.status || `Waiting ${Object.keys(this.players).length}/${this.maxplayers}`;
     this.render();
   }
@@ -78,25 +84,106 @@ class LobbyGame {
   
   render(){
 		this.$html.html(`
-<div class="lobbygame">
-<h3 class="title">${this.title}</h3>
-<h4 class="status">${this.status}</h4>
-<button class="join">Join</button>
-<button class="edit">Edit</button>
-</div>
-      `);
-//    this.$html.find(".join").off("click");//TODO: zombie check
-    this.$html.find(".join").on("click", ()=>{
-			this.database.child("players").child(fakeuserid).set(fakeuserobj);
-			//TODO: make sure a max of 4 players can join the game
-    });
-    this.$html.find(".edit").on("click", ()=>{
-			let newTitle = prompt("Enter the new title for the lobby:");
-			this.database.child("title").set(newTitle || this.title);
-    });
-  }
+		<div class = "lobbygame ${this.creator == userid ? "yours" : ""}">
+			<h3 class = "title">${this.title}</h3>
+			<h4 class = "status">${this.status}</h4>
+			<div class = "buttons"></div>
+		</div>
+		`);
+		if (Object.keys(this.players).indexOf(userid) > -1){
+			if (userid == this.creator){
+				this.$html.find(".buttons").html(`
+					<button class = "edit">Edit</button>
+					<button class = "delete">Delete</button>
+					<button class = "goto">Go to Game</button>
+				`);
+				this.$html.find(".delete").on("click", ()=>{
+					this.database.remove();
+				});
+				this.$html.find(".edit").on("click", ()=>{
+					let newtitle = prompt("Edit Lobby Title:");
+					this.database.child("title").set(newtitle || this.title);
+				});
+			} else {
+				this.$html.find(".buttons").html(`
+				<button class="leave">Leave</button>
+				<button class="goto">Go to Game</button>
+				`);
+				this.$html.find(".leave").on("click",()=>{
+					this.database.child("players").child(userid).remove();
+				});
+			}
+			this.$html.find(".goto").on("click", ()=>{
+				let gameParams = {
+					lobbyDB: this.database,
+					gameid: this.gameid
+				}
+				gotoScreen(gameParams);
+			});
+		} else {
+			this.$html.find(".buttons").html(`
+			<button class="join">Join</button>
+			`);
+			this.$html.find(".join").on("click", ()=>{
+				this.database.child("players").child(userid).set(userobj);
+			});
+		}
+	}
 }
+let renderLobbyStartScreen = function(lobbyDB, gameDB, param){
+	//renderTeamChooser
+}
+let renderActiveGame = function(gameDB, $body){
+	$body.html(`
+	<button id = "startTheGame">Start Game</button>
+	`)
+	$("#startTheGame").on("click", ()=>{
+		seconds = timeLimit;
+		scoreInc = false;
+		score = 0;
+		$body.classList.add("hidden");
+		//document.getElementById("startScreen").classList.add("hidden");
+		document.getElementById("game").classList.remove("hidden");
+		updateScore();
+		interval = setInterval(updateGame,1000);
+	});
+}
+let renderWaitingScreen = function(gameDB, $body, status, lobbyDB){
+	$body.html(`<h1>Game Status: ${status}</h1>`);
+	lobbyDB.child("status").on("value", ss=>{
+		$body.find("h1").html(`Game Status: ${ss.val()}`);
+	});
+};
 
+let gotoScreen = function(params){
+	mylobbiesDB.off();
+	let lobbyDB = params.lobbyDB;
+	let gameid = params.gameid;
+	$("body").html(`
+	<button id = "backtolobby">Back to Lobby</button>
+	<div id = "gamescreen">
+	</div>
+	`);
+	$("#backtolobby").click(renderLobby);
+	let gameDB = firebase.database().ref("activegames").child(gameid);
+	lobbyDB.child('players').child(userid).child('ready').on('value', (ss)=>{
+		let readyState = ss.val();
+		//console.log(readyState);
+		if(!readyState){
+			lobbyDB.child('status').off();
+			renderWaitingScreen(gameDB, $("#gamescreen"), status, lobbyDB);
+		} else {
+			lobbyDB.child('status').on('value', ss=>{
+				let status = ss.val();
+				if(status.substring(0,5) == "Ready"){
+					renderActiveGame(gameDB, $("#gamescreen"));
+				} else {
+					renderWaitingScreen(gameDB, $("#gamescreen"), status, lobbyDB);
+				}
+			});
+		}
+	});
+};
 function updateGame(){
 	document.getElementById("gameboard").innerHTML = "";
 	setTimeout(createNewImage, 500);
@@ -189,19 +276,37 @@ document.getElementById("start").onclick = function() {
 	interval = setInterval(updateGame,1000);
 }
 
-let makeGame = function(gameJSON){
-	let res = {};
-	res.created = gameJSON.created || new Date().toLocaleString();
-  res.title = gameJSON.title || `New Game ${res.created}`;
-  res.gameid = gameJSON.gameid || `Game-${Math.floor(Math.random()*1000000000)}`;
-  res.maxplayers = gameJSON.maxplayers || 4;
-  res.players = gameJSON.players || false;
-  res.status = gameJSON.status || `Starting Up`;
-  return res;
-}
+let renderLobby = function(){
+	$("#multiplayerLobby").html(`<button id = "newgame">Click to make lobby</button>`);
+	mylobbiesDB.on("child_added", (aGameSnap)=>{
+		let gameJSON = aGameSnap.val();
+		let newGameInstance = new LobbyGame(gameJSON, mylobbiesDB.child(aGameSnap.key));
+		$("#multiplayerLobby").append(newGameInstance.$html);
+	});
 
-document.getElementById("addLobby").onclick = function() {
-	let mylobbiesDB = myDatabase.ref("lobbies");
+	let makeGame = function(gameJSON){
+		let res = {};
+		res.created = gameJSON.created || new Date().toLocaleString();
+		res.title = gameJSON.title || `New Game ${res.created}`;
+		res.gameid = gameJSON.gameid || `Game-${Math.floor(Math.random()*1000000000)}`;
+		res.maxplayers = gameJSON.maxplayers || 4;
+		res.players = gameJSON.players || false;
+		res.status = gameJSON.status || `Starting Up`;
+		return res;
+	}
+
+	$("#newgame").click(()=>{
+		let newGameRef = mylobbiesDB.push();
+		let gameObj = makeGame({});
+		gameObj.creator = userid;
+		gameObj.gameid = newGameRef.key;
+		gameObj.players = {};
+		gameObj.players[userid] = userobj;
+		newGameRef.set(gameObj);
+	});
+};
+
+/*document.getElementById("addLobby").onclick = function() {
 	let newGameRef = mylobbiesDB.push();
 	let gameObj = makeGame({});
 	gameObj.creator = userid;
@@ -209,23 +314,31 @@ document.getElementById("addLobby").onclick = function() {
 	gameObj.players = {};
 	gameObj.players[userid] = userobj;
 	newGameRef.set(gameObj);
-	mylobbiesDB.on("child_added", (aGameSnap)=>{
+	mylobbiesDB.once("child_added", (aGameSnap)=>{
+		//console.log(mylobbiesDB.child(aGameSnap.key));
 		newGameRef = new LobbyGame(gameObj, mylobbiesDB.child(aGameSnap.key));
+		lobbies.push(newGameRef);
+	})*/
+	/*mylobbiesDB.once('value', function(snapshot) {
+		snapshot.forEach(function(childSnapshot) {
+			$("#multiplayerLobby").append(childSnapshot.$html);
+		})
+	})*/
+	/*mylobbiesDB.once("child_added", (aGameSnap)=>{
+		//console.log(mylobbiesDB.child(aGameSnap.key));
+		newGameRef = new LobbyGame(gameObj, mylobbiesDB.child(aGameSnap.key));
+		console.log(newGameRef);
 		$("#multiplayerLobby").append(newGameRef.$html);
 	});
-	/*mylobbiesDB.on("child_added", (aGameSnap)=>{
-		let gameJSON = aGameSnap.val();
-		console.log(mylobbiesDB.child(aGameSnap.key));
-		//console.log(gameJSON);
-		newGameRef = new LobbyGame(gameJSON, mylobbiesDB.child(aGameSnap.key));
-		$("#multiplayerLobby").append(newGameRef.$html);
-	});*/
+	displayLobbies();*/
 	//TODO need a child_removed to get rid of deleted games
-}
+//}
 
 document.getElementById("multiplayer").onclick = function() {
 	document.getElementById("startScreen").classList.add("hidden");
 	document.getElementById("multiplayerLobby").classList.remove("hidden");
+	renderLobby();
+	//displayLobbies();
 }
 
 document.getElementById("playagain").onclick = function() {
