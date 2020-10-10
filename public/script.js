@@ -31,22 +31,6 @@ var interval;
 var lobbies = [];
 var visibleLobbies = [];
 
-//let fakeuserid = "nchintala";
-//let fakeuserobj = {"username": "NishChin", "ready":false};
-
-/*let gameDemo = {
-	"gameid":"randomgameidhere",
-  	"created":"2020-10-02T12:49:00.000Z",
-	"maxplayers":2,  
-	"status":"Waiting 1/2",
-	"players": {
-		"player1idhere": {
-			"username": "ProfNinja",
-			"ready": false
-		}
-	}
-}*/
-
 class LobbyGame {
 	constructor(gameJSON, ref){
 		this.database = ref;
@@ -125,6 +109,8 @@ class LobbyGame {
 			<button class="join">Join</button>
 			`);
 			this.$html.find(".join").on("click", ()=>{
+				let username = prompt("Enter a username:")||Math.floor(Math.random()*100000);
+				userobj = {"username":username,"ready":false};
 				this.database.child("players").child(userid).set(userobj);
 			});
 		}
@@ -153,6 +139,7 @@ let renderWaitingScreen = function(gameDB, $body, status, lobbyDB){
 	lobbyDB.child("status").on("value", ss=>{
 		$body.find("h1").html(`Game Status: ${ss.val()}`);
 	});
+	
 };
 
 let gotoScreen = function(params){
@@ -165,7 +152,7 @@ let gotoScreen = function(params){
 	</div>
 	`);
 	$("#backtolobby").click(renderLobby);
-	let gameDB = firebase.database().ref("activegames").child(gameid);
+	let gameDB = firebase.database().ref("lobbies").child(gameid);
 	lobbyDB.child('players').child(userid).child('ready').on('value', (ss)=>{
 		let readyState = ss.val();
 		//console.log(readyState);
@@ -296,11 +283,13 @@ let renderLobby = function(){
 	}
 
 	$("#newgame").click(()=>{
+		let username = prompt("Enter a username:") || Math.floor(Math.random()*100000);
 		let newGameRef = mylobbiesDB.push();
 		let gameObj = makeGame({});
 		gameObj.creator = userid;
 		gameObj.gameid = newGameRef.key;
 		gameObj.players = {};
+		userobj = {"username":username,"ready":false};
 		gameObj.players[userid] = userobj;
 		newGameRef.set(gameObj);
 	});
