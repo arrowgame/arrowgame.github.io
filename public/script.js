@@ -1,3 +1,5 @@
+//const { clear } = require("console");
+
 var firebaseConfig = {
     apiKey: "AIzaSyCxs_wnFFO1qFvcJUFkK3VzHbZdlPKGP_o",
     authDomain: "arrowgame-f0b5f.firebaseapp.com",
@@ -175,6 +177,7 @@ let gotoScreen = function(params){
 					document.getElementById("lobbyScreen").classList.add("hidden");
 					lobbyDB.child('status').set("Starting Up");
 					startGame();
+					gameDB.remove();
 				} else {
 					renderWaitingScreen(gameDB, $("#gamescreen"), status, lobbyDB);
 				}
@@ -186,7 +189,7 @@ function updateGame(){
 	document.getElementById("gameboard").innerHTML = "";
 	setTimeout(createNewImage, 500);
 	updateClock();
-	document.addEventListener("keyup", event => {
+	document.addEventListener("keydown", event => {
 		if(event.keyCode== 37 && scoreInc){
 			//console.log("left");
 			if(currentImage=="blueleftarrow" || currentImage == "redrightarrow"){
@@ -265,6 +268,7 @@ function createNewImage(){
 	scoreInc = true;
 }
 let startGame = function(){
+	//clearInterval(interval)
 	seconds = timeLimit;
 	scoreInc = false;
 	userobj.score = 0;
@@ -274,15 +278,6 @@ let startGame = function(){
 	interval = setInterval(updateGame,1000);
 }
 document.getElementById("start").onclick = startGame;
-/*document.getElementById("start").onclick = function() {
-	seconds = timeLimit;
-	scoreInc = false;
-	score = 0;
-	document.getElementById("startScreen").classList.add("hidden");
-	document.getElementById("game").classList.remove("hidden");
-	updateScore();
-	interval = setInterval(updateGame,1000);
-}*/
 
 let renderLobby = function(){
 	document.getElementById("multiplayerLobby").classList.remove("hidden");
