@@ -117,16 +117,6 @@ class LobbyGame {
 		}
 	}
 }
-let renderLobbyStartScreen = function(lobbyDB, gameDB, param){
-	//renderTeamChooser
-}
-let renderActiveGame = function(gameDB, $body){
-	seconds = timeLimit;
-	scoreInc = false;
-	score = 0;
-	updateScore();
-	interval = setInterval(updateGame,1000);
-}
 let renderWaitingScreen = function(gameDB, $body, status, lobbyDB, gameid){
 	$body.html(`
 	<h1>Game Status: ${status}</h1>
@@ -145,9 +135,14 @@ let renderWaitingScreen = function(gameDB, $body, status, lobbyDB, gameid){
 		$("#startPlayingGame").removeAttr('disabled');
 	}
 	$("#startPlayingGame").on("click", ()=>{
+		lobbyDB.child("status").set("In Progress");
+		//startGame();
+		//document.getElementById("lobbyScreen").classList.add("hidden");
+	})
+	/*lobbyDB.child("status").on("child_changed", ()=>{
 		startGame();
 		document.getElementById("lobbyScreen").classList.add("hidden");
-	})
+	})*/
 };
 
 let gotoScreen = function(params){
@@ -176,8 +171,10 @@ let gotoScreen = function(params){
 		} else {
 			lobbyDB.child('status').on('value', ss=>{
 				let status = ss.val();
-				if(status.substring(0,5) == "Ready"){
-					renderActiveGame(gameDB, $("#gamescreen"));
+				if(status=="In Progress"){
+					document.getElementById("lobbyScreen").classList.add("hidden");
+					lobbyDB.child('status').set("Starting Up");
+					startGame();
 				} else {
 					renderWaitingScreen(gameDB, $("#gamescreen"), status, lobbyDB);
 				}
@@ -233,6 +230,7 @@ function endGame(){
 	document.getElementById("game").classList.add("hidden");
 	document.getElementById("end").classList.remove("hidden");
 	document.getElementById("gameover").innerHTML = "Score: " + userobj.score;
+	//mylobbiesDB.child(gameid).status.set("Starting Up");
 }
 
 function updateClock(){
@@ -269,7 +267,7 @@ function createNewImage(){
 let startGame = function(){
 	seconds = timeLimit;
 	scoreInc = false;
-	score = 0;
+	userobj.score = 0;
 	document.getElementById("startScreen").classList.add("hidden");
 	document.getElementById("game").classList.remove("hidden");
 	updateScore();
