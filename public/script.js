@@ -146,6 +146,7 @@ let renderWaitingScreen = function(gameDB, $body, status, lobbyDB, gameid){
 	}
 	$("#startPlayingGame").on("click", ()=>{
 		startGame();
+		document.getElementById("lobbyScreen").classList.add("hidden");
 	})
 };
 
@@ -153,11 +154,13 @@ let gotoScreen = function(params){
 	mylobbiesDB.off();
 	let lobbyDB = params.lobbyDB;
 	let gameid = params.gameid;
-	$("body").html(`
+	$("#lobbyScreen").html(`
 	<button id = "backtolobby">Back to Lobby</button>
 	<div id = "gamescreen">
 	</div>
 	`);
+	document.getElementById("multiplayerLobby").classList.add("hidden");
+	document.getElementById("lobbyScreen").classList.remove("hidden");
 	//$("#backtolobby").click(renderLobby);
 	$('#backtolobby').on("click", ()=>{
 		//document.getElementById("multiplayerLobby").classList.remove("hidden");
@@ -190,7 +193,7 @@ function updateGame(){
 		if(event.keyCode== 37 && scoreInc){
 			//console.log("left");
 			if(currentImage=="blueleftarrow" || currentImage == "redrightarrow"){
-				score+=100;
+				userobj.score+=100;
 				updateScore();
 			}
 			scoreInc = false; 
@@ -198,7 +201,7 @@ function updateGame(){
 		else if(event.which == 39 && scoreInc){
 			//console.log("right");
 			if(currentImage=="bluerightarrow" || currentImage == "redleftarrow"){
-				score+=100;
+				userobj.score+=100;
 				updateScore();
 			}
 			scoreInc = false;
@@ -206,7 +209,7 @@ function updateGame(){
 		else if(event.which == 38 && scoreInc){
 			//console.log("up");
 			if(currentImage=="blueuparrow" || currentImage == "reddownarrow"){
-				score+=100;
+				userobj.score+=100;
 				updateScore();
 			}
 			scoreInc = false;
@@ -214,7 +217,7 @@ function updateGame(){
 		else if(event.which == 40 && scoreInc){
 			//console.log("down");
 			if(currentImage=="bluedownarrow" || currentImage == "reduparrow"){
-				score+=100;
+				userobj.score+=100;
 				updateScore();
 			}
 			scoreInc = false;
@@ -229,7 +232,7 @@ function endGame(){
 	clearInterval(interval);
 	document.getElementById("game").classList.add("hidden");
 	document.getElementById("end").classList.remove("hidden");
-	document.getElementById("gameover").innerHTML = "Score: " + score;
+	document.getElementById("gameover").innerHTML = "Score: " + userobj.score;
 }
 
 function updateClock(){
@@ -244,7 +247,7 @@ function updateClock(){
 function updateScore(){
 	document.getElementById("scoreboard").innerHTML = "Score:";
 	var scoreDisplay = document.createElement("p");
-	scoreDisplay.innerText = score;
+	scoreDisplay.innerText = userobj.score;
 	var board = document.getElementById("scoreboard");
 	board.appendChild(scoreDisplay);
 }
