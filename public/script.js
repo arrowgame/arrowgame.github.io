@@ -17,7 +17,7 @@ if (!userid){
   uuid = `userid-${Math.floor(1000000000*Math.random())}`;
   localStorage.setItem("userid", uuid);
 }
-let userobj = {"username":"Anonymous","ready":false};
+let userobj = {"username":"Anonymous","ready":false, "score":0};
 const timeLimit = 10;
 var timeInterval = 1000;
 var score = 0;
@@ -111,7 +111,7 @@ class LobbyGame {
 			`);
 			this.$html.find(".join").on("click", ()=>{
 				let username = prompt("Enter a username:")||Math.floor(Math.random()*100000);
-				userobj = {"username":username,"ready":false};
+				userobj = {"username":username,"ready":false, "score":0};
 				this.database.child("players").child(userid).set(userobj);
 			});
 		}
@@ -124,9 +124,6 @@ let renderActiveGame = function(gameDB, $body){
 	seconds = timeLimit;
 	scoreInc = false;
 	score = 0;
-	//$body.classList.add("hidden");
-	//document.getElementById("startScreen").classList.add("hidden");
-	//document.getElementById("game").classList.remove("hidden");
 	updateScore();
 	interval = setInterval(updateGame,1000);
 }
@@ -145,7 +142,6 @@ let renderWaitingScreen = function(gameDB, $body, status, lobbyDB, gameid){
 		playerCount = snapshot.numChildren();
 	})
 	if(playerCount > 1){
-		console.log("reached");
 		$("#startPlayingGame").removeAttr('disabled');
 	}
 	$("#startPlayingGame").on("click", ()=>{
@@ -314,7 +310,7 @@ let renderLobby = function(){
 		gameObj.creator = userid;
 		gameObj.gameid = newGameRef.key;
 		gameObj.players = {};
-		userobj = {"username":username,"ready":false};
+		userobj = {"username":username,"ready":false, "score":0};
 		gameObj.players[userid] = userobj;
 		newGameRef.set(gameObj);
 	});
