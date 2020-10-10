@@ -102,6 +102,7 @@ class LobbyGame {
 					lobbyDB: this.database,
 					gameid: this.gameid
 				}
+				this.database.child("players").child(userid).child("ready").set(true);
 				gotoScreen(gameParams);
 			});
 		} else {
