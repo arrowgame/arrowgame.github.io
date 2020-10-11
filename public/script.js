@@ -138,13 +138,7 @@ let renderWaitingScreen = function(gameDB, $body, status, lobbyDB, gameid){
 	}
 	$("#startPlayingGame").on("click", ()=>{
 		lobbyDB.child("status").set("In Progress");
-		//startGame();
-		//document.getElementById("lobbyScreen").classList.add("hidden");
 	})
-	/*lobbyDB.child("status").on("child_changed", ()=>{
-		startGame();
-		document.getElementById("lobbyScreen").classList.add("hidden");
-	})*/
 };
 
 let gotoScreen = function(params){
@@ -186,48 +180,56 @@ let gotoScreen = function(params){
 	});
 };
 function updateGame(){
+	//scoreInc = true;
 	document.getElementById("gameboard").innerHTML = "";
-	setTimeout(createNewImage, 500);
+	createNewImage();
+	//setTimeout(createNewImage, 500);
 	updateClock();
-	document.addEventListener("keydown", event => {
-		var key = event.keyCode;
-		if(key== 37 && scoreInc){
-			console.log("left");
-			if(currentImage=="blueleftarrow" || currentImage == "redrightarrow"){
-				userobj.score+=100;
-				updateScore();
-			}
-			scoreInc = false; 
-		}
-		else if(key == 39 && scoreInc){
-			console.log("right");
-			if(currentImage=="bluerightarrow" || currentImage == "redleftarrow"){
-				userobj.score+=100;
-				updateScore();
-			}
-			scoreInc = false;
-		}
-		else if(key == 38 && scoreInc){
-			console.log("up");
-			if(currentImage=="blueuparrow" || currentImage == "reddownarrow"){
-				userobj.score+=100;
-				updateScore();
-			}
-			scoreInc = false;
-		}
-		else if(key == 40 && scoreInc){
-			console.log("down");
-			if(currentImage=="bluedownarrow" || currentImage == "reduparrow"){
-				userobj.score+=100;
-				updateScore();
-			}
-			scoreInc = false;
-		}
-	});
+	setTimeout(clearBoard,500);
 	if(seconds == -2){
 		endGame();
 	}
 }
+
+function clearBoard(){
+	document.getElementById("gameboard").innerHTML = "";
+}
+
+document.addEventListener("keyup", event => {
+	var key = event.keyCode;
+	if(key== 37 && scoreInc){
+		console.log("left");
+		if(currentImage=="blueleftarrow" || currentImage == "redrightarrow"){
+			userobj.score+=100;
+			updateScore();
+		}
+		scoreInc = false; 
+	}
+	else if(key == 39 && scoreInc){
+		console.log("right");
+		if(currentImage=="bluerightarrow" || currentImage == "redleftarrow"){
+			userobj.score+=100;
+			updateScore();
+		}
+		scoreInc = false;
+	}
+	else if(key == 38 && scoreInc){
+		console.log("up");
+		if(currentImage=="blueuparrow" || currentImage == "reddownarrow"){
+			userobj.score+=100;
+			updateScore();
+		}
+		scoreInc = false;
+	}
+	else if(key == 40 && scoreInc){
+		console.log("down");
+		if(currentImage=="bluedownarrow" || currentImage == "reduparrow"){
+			userobj.score+=100;
+			updateScore();
+		}
+		scoreInc = false;
+	}
+});
 
 function endGame(){
 	clearInterval(interval);
@@ -265,11 +267,10 @@ function createNewImage(){
 	})
 	img.src = "/images/"+ currentImage + ".png";
 	var src = document.getElementById("gameboard");
-	src.appendChild(img);
 	scoreInc = true;
+	src.appendChild(img);
 }
 let startGame = function(){
-	//clearInterval(interval)
 	seconds = timeLimit;
 	scoreInc = false;
 	userobj.score = 0;
