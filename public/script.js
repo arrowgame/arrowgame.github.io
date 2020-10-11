@@ -190,32 +190,33 @@ function updateGame(){
 	setTimeout(createNewImage, 500);
 	updateClock();
 	document.addEventListener("keydown", event => {
-		if(event.keyCode== 37 && scoreInc){
-			//console.log("left");
+		var key = event.keyCode;
+		if(key== 37 && scoreInc){
+			console.log("left");
 			if(currentImage=="blueleftarrow" || currentImage == "redrightarrow"){
 				userobj.score+=100;
 				updateScore();
 			}
 			scoreInc = false; 
 		}
-		else if(event.which == 39 && scoreInc){
-			//console.log("right");
+		else if(key == 39 && scoreInc){
+			console.log("right");
 			if(currentImage=="bluerightarrow" || currentImage == "redleftarrow"){
 				userobj.score+=100;
 				updateScore();
 			}
 			scoreInc = false;
 		}
-		else if(event.which == 38 && scoreInc){
-			//console.log("up");
+		else if(key == 38 && scoreInc){
+			console.log("up");
 			if(currentImage=="blueuparrow" || currentImage == "reddownarrow"){
 				userobj.score+=100;
 				updateScore();
 			}
 			scoreInc = false;
 		}
-		else if(event.which == 40 && scoreInc){
-			//console.log("down");
+		else if(key == 40 && scoreInc){
+			console.log("down");
 			if(currentImage=="bluedownarrow" || currentImage == "reduparrow"){
 				userobj.score+=100;
 				updateScore();
